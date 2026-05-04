@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import WatchImg from './assets/images/regenerated_image_1777780536089.png';
-import AboutImg from './assets/images/regenerated_image_1777791230622.png';
-import LogoContentImg from './assets/images/regenerated_image_1777791692471.png';
-import LogoHeaderImg from './assets/images/regenerated_image_1777791698608.png';
-import { Instagram, Facebook, Phone } from 'lucide-react';
+
+const WatchImg = 'https://res.cloudinary.com/mustanser/image/upload/v1777858868/Gemini_Generated_Image_wm43vwm43vwm43vw_ffrr7i.png';
+const AboutImg = 'https://res.cloudinary.com/mustanser/image/upload/v1777858866/Gemini_Generated_Image_67yuvo67yuvo67yu2_ohtzrv.png';
+const LogoContentImg = 'https://res.cloudinary.com/mustanser/image/upload/v1777858879/Group_1_ftoi8r.png';
+const LogoHeaderImg = 'https://res.cloudinary.com/mustanser/image/upload/v1777858878/mst-text_aq3hk0.png';
 
 export default function App() {
   const [subscribed, setSubscribed] = useState(false);
@@ -111,21 +111,22 @@ export default function App() {
     <div className="bg-background text-on-background font-body-md selection:bg-secondary-container min-h-screen flex flex-col">
       {/* Minimal Header */}
       <motion.header 
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-        className="absolute top-0 left-0 right-0 z-50 py-8 px-8 md:px-16 xl:px-24 flex justify-between items-center transition-all bg-transparent"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1.2, ease: "easeInOut" }}
+        className="absolute top-0 left-0 right-0 z-50 py-6 md:py-8 px-6 md:px-16 xl:px-24 flex justify-between items-center transition-all bg-transparent gap-4"
       >
         <a href="#" aria-label="Mustanser Home" className="flex-shrink-0 cursor-pointer transition-opacity hover:opacity-80">
           <img 
             src={LogoHeaderImg} 
             alt="Mustanser Logo" 
-            className="h-10 md:h-12 w-auto object-contain" 
+            loading="eager"
+            className="h-5 sm:h-8 md:h-12 w-auto object-contain" 
           />
         </a>
-        <div className="hidden md:flex gap-12">
-            <a className="font-label-caps text-[10px] tracking-[0.2em] text-cream hover:text-champagne-gold transition-colors uppercase" href="#about">About us</a>
-            <a className="font-label-caps text-[10px] tracking-[0.2em] text-cream hover:text-champagne-gold transition-colors uppercase" href="#contact">Contact</a>
+        <div className="flex gap-4 sm:gap-6 md:gap-12">
+            <a className="font-label-caps text-[9px] md:text-[10px] tracking-[0.1em] md:tracking-[0.2em] text-cream hover:text-champagne-gold transition-colors uppercase whitespace-nowrap" href="#about">About us</a>
+            <a className="font-label-caps text-[9px] md:text-[10px] tracking-[0.1em] md:tracking-[0.2em] text-cream hover:text-champagne-gold transition-colors uppercase whitespace-nowrap" href="#contact">Contact</a>
         </div>
       </motion.header>
 
@@ -142,6 +143,7 @@ export default function App() {
             <img 
               alt="Mustanser Parfum Texture" 
               className="w-full h-full object-cover scale-105" 
+              loading="eager"
               src={WatchImg}
             />
           </motion.div>
@@ -160,7 +162,8 @@ export default function App() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.8, delay: 0.4 }}
                 src={LogoContentImg} 
-                alt="Mustanser Parfum Logo" 
+                alt="Mustanser Parfum Logo"
+                loading="eager"
                 className="h-14 md:h-20 w-auto object-contain mx-auto mb-6 cursor-pointer hover:opacity-90 transition-opacity"
               />
               
@@ -294,22 +297,34 @@ export default function App() {
 
           {/* Left Text */}
           <motion.div 
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            initial="hidden"
+            whileInView="visible"
             viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
+            variants={{
+              hidden: { opacity: 0 },
+              visible: {
+                opacity: 1,
+                transition: { staggerChildren: 0.15, delayChildren: 0.1 }
+              }
+            }}
             className="w-full md:w-1/2 flex flex-col justify-center order-1 md:order-2"
           >
-            <div className="flex items-center gap-4 mb-8">
+            <motion.div 
+              variants={{
+                hidden: { opacity: 0, x: 20 },
+                visible: { opacity: 1, x: 0, transition: { duration: 0.6, ease: "easeOut" } }
+              }}
+              className="flex items-center gap-4 mb-8"
+            >
               <span className="font-label-caps text-[10px] tracking-[0.3em] text-gold uppercase">About Us</span>
               <div className="w-16 h-[1px] bg-gold"></div>
-            </div>
+            </motion.div>
 
             <motion.h2 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.8, delay: 0.4 }}
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
+              }}
               className="font-h1 text-[44px] md:text-[56px] leading-[1.05] mb-8 text-primary"
             >
               The Architecture <br /> of Essence.
@@ -317,18 +332,18 @@ export default function App() {
 
             <div className="font-body-md text-charcoal space-y-6 font-light leading-relaxed mb-12 max-w-lg text-[15px]">
               <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-100px" }}
-                transition={{ duration: 0.8, delay: 0.6 }}
+                variants={{
+                  hidden: { opacity: 0, y: 20 },
+                  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
+                }}
               >
                 Mustanser Parfum crafts timeless olfactory experiences built on precision, patience, and intention. We view fragrance as presence.
               </motion.p>
               <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-100px" }}
-                transition={{ duration: 0.8, delay: 0.8 }}
+                variants={{
+                  hidden: { opacity: 0, y: 20 },
+                  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
+                }}
               >
                 Every composition is a careful study in chemistry and craft. Built with carefully selected raw materials, balanced structures, and a strict attention to detail, we create our fragrances as lasting signatures.
               </motion.p>
@@ -338,13 +353,13 @@ export default function App() {
       </main>
 
       {/* Footer / Contact Section */}
-      <footer id="contact" className="w-full bg-carbon-black pt-24 md:pt-32 pb-12 px-8 md:px-16 lg:px-32">
+      <footer id="contact" className="w-full bg-carbon-black pt-16 md:pt-32 pb-8 md:pb-12 px-6 md:px-16 lg:px-32">
           <motion.div 
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="max-w-[1440px] mx-auto flex flex-col md:flex-row justify-between items-start gap-16 mb-24"
+            className="max-w-[1440px] mx-auto flex flex-col md:flex-row justify-between items-start gap-10 md:gap-16 mb-16 md:mb-24"
           >
             
             {/* Left Box: Logo & Mission */}
@@ -362,7 +377,7 @@ export default function App() {
             </div>
 
             {/* Right Box: Grid with Contact & Social */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-12 md:gap-24 w-full md:w-auto text-left">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-10 md:gap-24 w-full md:w-auto text-left">
               
               {/* Contact Links */}
               <div className="flex flex-col gap-6">
