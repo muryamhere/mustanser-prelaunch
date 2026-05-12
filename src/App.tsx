@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 
-const WatchImg = 'https://res.cloudinary.com/mustanser/image/upload/v1777858868/Gemini_Generated_Image_wm43vwm43vwm43vw_ffrr7i.png';
-const AboutImg = 'https://res.cloudinary.com/mustanser/image/upload/v1777858866/Gemini_Generated_Image_67yuvo67yuvo67yu2_ohtzrv.png';
-const LogoContentImg = 'https://res.cloudinary.com/mustanser/image/upload/v1777858879/Group_1_ftoi8r.png';
-const LogoHeaderImg = 'https://res.cloudinary.com/mustanser/image/upload/v1777858878/mst-text_aq3hk0.png';
+const WatchImg = 'https://res.cloudinary.com/mustanser/image/upload/f_auto,q_auto/v1777858868/Gemini_Generated_Image_wm43vwm43vwm43vw_ffrr7i.png';
+const AboutImg = 'https://res.cloudinary.com/mustanser/image/upload/f_auto,q_auto/v1777858866/Gemini_Generated_Image_67yuvo67yuvo67yu2_ohtzrv.png';
+const LogoContentImg = 'https://res.cloudinary.com/mustanser/image/upload/f_auto,q_auto/v1777858879/Group_1_ftoi8r.png';
+const LogoHeaderImg = 'https://res.cloudinary.com/mustanser/image/upload/f_auto,q_auto/v1777858878/mst-text_aq3hk0.png';
 
 export default function App() {
   const [subscribed, setSubscribed] = useState(false);
@@ -121,6 +121,7 @@ export default function App() {
             src={LogoHeaderImg} 
             alt="Mustanser Logo" 
             loading="eager"
+            fetchPriority="high"
             className="h-5 sm:h-8 md:h-12 w-auto object-contain" 
           />
         </a>
@@ -144,6 +145,7 @@ export default function App() {
               alt="Mustanser Parfum Texture" 
               className="w-full h-full object-cover scale-105" 
               loading="eager"
+              fetchPriority="high"
               src={WatchImg}
             />
           </motion.div>
@@ -164,6 +166,7 @@ export default function App() {
                 src={LogoContentImg} 
                 alt="Mustanser Parfum Logo"
                 loading="eager"
+                fetchPriority="high"
                 className="h-14 md:h-20 w-auto object-contain mx-auto mb-6 cursor-pointer hover:opacity-90 transition-opacity"
               />
               
@@ -275,7 +278,8 @@ export default function App() {
              <div className="aspect-[3/4] w-full max-w-[400px] relative bg-carbon-black shadow-2xl mx-auto md:ml-0 md:mr-auto group overflow-hidden">
                 <img 
                   src={AboutImg} 
-                  alt="The Mustanser Atelier" 
+                  alt="The Mustanser Atelier"
+                  loading="lazy"
                   className="absolute inset-0 w-full h-full object-cover opacity-80 mix-blend-luminosity group-hover:scale-105 transition-transform duration-[2s] ease-out" 
                 />
              </div>
@@ -368,6 +372,7 @@ export default function App() {
                 <img 
                   src={LogoHeaderImg} 
                   alt="Mustanser Logo" 
+                  loading="lazy"
                   className="h-10 md:h-12 w-auto object-contain" 
                 />
               </a>
