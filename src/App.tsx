@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
+import Silk from './components/Silk';
+import BorderGlow from './components/BorderGlow';
 
-const WatchImg = 'https://res.cloudinary.com/mustanser/image/upload/f_auto,q_auto/v1777858868/Gemini_Generated_Image_wm43vwm43vwm43vw_ffrr7i.png';
-const AboutImg = 'https://res.cloudinary.com/mustanser/image/upload/f_auto,q_auto/v1777858866/Gemini_Generated_Image_67yuvo67yuvo67yu2_ohtzrv.png';
-const LogoContentImg = 'https://res.cloudinary.com/mustanser/image/upload/f_auto,q_auto/v1777858879/Group_1_ftoi8r.png';
-const LogoHeaderImg = 'https://res.cloudinary.com/mustanser/image/upload/f_auto,q_auto/v1777858878/mst-text_aq3hk0.png';
+const LogoContentImg = 'https://res.cloudinary.com/mustanser/image/upload/v1777858879/Group_1_ftoi8r.png';
 
 export default function App() {
   const [subscribed, setSubscribed] = useState(false);
@@ -16,7 +15,7 @@ export default function App() {
     e.preventDefault();
     const val = inputValue.trim();
     if (!val) {
-      setError('Please provide your email or phone number.');
+      setError('Please provide your email.');
       return;
     }
     
@@ -28,29 +27,20 @@ export default function App() {
       const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      const phoneRegex = /^\+?[\d\s\-()]{7,20}$/;
-      const digitsOnly = val.replace(/\D/g, '');
-      
       const isEmailFormat = emailRegex.test(val);
-      const isPhoneFormat = phoneRegex.test(val) && digitsOnly.length >= 7;
 
-      if (!isEmailFormat && !isPhoneFormat) {
+      if (!isEmailFormat) {
         setIsSubmitting(false);
-        setError('Please enter a valid email address or phone number.');
+        setError('Please enter a valid email address.');
         return;
       }
 
-      const payloadEmail = isEmailFormat ? val : null;
-      const payloadPhone = isPhoneFormat ? val : null;
-
-      // In case keys aren't added, skip actual fetch to prevent crash but show success for demo.
       if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-        console.warn('Supabase keys missing, falling back to mock success.');
         await new Promise(resolve => setTimeout(resolve, 800));
         setSubscribed(true);
       } else {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+        const timeoutId = setTimeout(() => controller.abort(), 15000);
 
         try {
           const response = await fetch(`${SUPABASE_URL}/rest/v1/waitlist`, {
@@ -64,8 +54,7 @@ export default function App() {
             },
             body: JSON.stringify({ 
               id: crypto.randomUUID(),
-              email: payloadEmail, 
-              phone: payloadPhone 
+              email: val
             })
           });
 
@@ -75,12 +64,11 @@ export default function App() {
             let errorDetail = 'Failed to save information';
             try {
               const errorData = await response.json();
-              console.error("Supabase Error Data:", errorData);
               errorDetail = errorData.message || errorData.details || errorData.hint || errorDetail;
               
               if (errorDetail.includes('null value in column "id"')) {
-                 errorDetail = "Database error: Please ensure the 'id' column in your Supabase 'waitlist' table has a default value (e.g., gen_random_uuid()).";
-              } else if (errorDetail.includes('duplicate key value violates unique constraint') || errorDetail.includes('waitlist_email_key') || errorDetail.includes('waitlist_phone_key')) {
+                 errorDetail = "Database error: Please check database default values.";
+              } else if (errorDetail.includes('duplicate key') || errorDetail.includes('waitlist_email_key')) {
                  setSubscribed(true);
                  return;
               }
@@ -94,7 +82,7 @@ export default function App() {
         } catch (fetchErr: any) {
           clearTimeout(timeoutId);
           if (fetchErr.name === 'AbortError') {
-            throw new Error("The request took too long. If you are using a free Supabase database, it might be waking up from sleep. Please try again in a minute.");
+            throw new Error("The request took too long. Please try again.");
           }
           throw fetchErr;
         }
@@ -108,339 +96,179 @@ export default function App() {
   };
 
   return (
-    <div className="bg-background text-on-background font-body-md selection:bg-secondary-container min-h-screen flex flex-col">
-      {/* Minimal Header */}
-      <motion.header 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1.2, ease: "easeInOut" }}
-        className="absolute top-0 left-0 right-0 z-50 py-6 md:py-8 px-6 md:px-16 xl:px-24 flex justify-between items-center transition-all bg-transparent gap-4"
-      >
-        <a href="#" aria-label="Mustanser Home" className="flex-shrink-0 cursor-pointer transition-opacity hover:opacity-80">
+    <div className="relative min-h-screen flex flex-col overflow-hidden bg-[#0a0a0a] text-white font-body-md">
+      
+      {/* Silk Background */}
+      <div className="absolute inset-0 z-0 pointer-events-none opacity-40">
+        <Silk 
+          speed={3}
+          scale={1}
+          color="#E6C27A"
+          noiseIntensity={1}
+          rotation={0}
+        />
+      </div>
+
+      {/* Main Content */}
+      <main className="relative z-10 flex-grow flex flex-col items-center justify-center px-4 py-20 pb-40">
+        
+        {/* Logo */}
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1, ease: 'easeOut' }}
+          className="mb-8 md:mb-12"
+        >
           <img 
-            src={LogoHeaderImg} 
-            alt="Mustanser Logo" 
+            src={LogoContentImg} 
+            alt="Mustanser Parfum Logo"
+            className="h-16 sm:h-20 md:h-24 w-auto object-contain drop-shadow-2xl opacity-90 hover:opacity-100 transition-opacity" 
             loading="eager"
             fetchPriority="high"
-            className="h-5 sm:h-8 md:h-12 w-auto object-contain" 
           />
-        </a>
-        <div className="flex gap-4 sm:gap-6 md:gap-12">
-            <a className="font-label-caps text-[9px] md:text-[10px] tracking-[0.1em] md:tracking-[0.2em] text-cream hover:text-champagne-gold transition-colors uppercase whitespace-nowrap" href="#about">About us</a>
-            <a className="font-label-caps text-[9px] md:text-[10px] tracking-[0.1em] md:tracking-[0.2em] text-cream hover:text-champagne-gold transition-colors uppercase whitespace-nowrap" href="#contact">Contact</a>
-        </div>
-      </motion.header>
+        </motion.div>
 
-      <main className="flex-grow">
-        {/* Full Bleed Hero Section */}
-        <section className="relative h-screen w-full flex items-center justify-center overflow-hidden">
-          {/* Full Screen Background Image */}
-          <motion.div 
-            initial={{ opacity: 0, scale: 1.05 }}
-            animate={{ opacity: 0.9, scale: 1 }}
-            transition={{ duration: 1.5, ease: "easeOut" }}
-            className="absolute inset-0 z-0 bg-background"
-          >
-            <img 
-              alt="Mustanser Parfum Texture" 
-              className="w-full h-full object-cover scale-105" 
-              loading="eager"
-              fetchPriority="high"
-              src={WatchImg}
-            />
-          </motion.div>
-          
-          {/* Content Container */}
-          <div className="relative z-10 w-full px-4 md:px-6 flex flex-col items-center justify-center max-w-4xl mx-auto mt-0">
-            {/* Clear Blur Container wrapping all hero text and form */}
-            <motion.div 
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
-              className="bg-white/5 backdrop-blur-md border border-white/10 px-6 py-10 md:px-12 md:py-14 w-full max-w-2xl shadow-2xl relative flex flex-col items-center text-center"
-            >
-              <motion.img 
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.8, delay: 0.4 }}
-                src={LogoContentImg} 
-                alt="Mustanser Parfum Logo"
-                loading="eager"
-                fetchPriority="high"
-                className="h-14 md:h-20 w-auto object-contain mx-auto mb-6 cursor-pointer hover:opacity-90 transition-opacity"
-              />
-              
-              <motion.p 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.8, delay: 0.6 }}
-                className="font-label-caps text-[10px] md:text-sm tracking-[0.3em] text-cream/90 uppercase mb-4 md:mb-6 drop-shadow-md"
-              >
-                Launching soon.
-              </motion.p>
+        {/* Title */}
+        <motion.h1 
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className="text-center text-6xl sm:text-7xl md:text-[5.5rem] font-bold tracking-tight mb-12 text-transparent bg-clip-text bg-gradient-to-br from-white via-white to-white/40 drop-shadow-2xl"
+          style={{ paddingBottom: '0.1em' }}
+        >
+          Coming soon!
+        </motion.h1>
 
-              <motion.h1 
-                initial="hidden"
-                animate="visible"
-                variants={{
-                  hidden: { opacity: 0 },
-                  visible: {
-                    opacity: 1,
-                    transition: { staggerChildren: 0.2, delayChildren: 0.6 }
-                  }
-                }}
-                className="font-h1 text-[24px] sm:text-[32px] md:text-[38px] lg:text-[46px] leading-[1.2] md:leading-[1.1] mb-8 md:mb-10 text-cream tracking-tight drop-shadow-xl max-w-[90vw] mx-auto"
-              >
-                <motion.span 
-                  variants={{
-                    hidden: { opacity: 0, y: 20 },
-                    visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } }
-                  }}
-                  className="block"
-                >
-                  Timeless fragrances
-                </motion.span>
-                <motion.span 
-                  variants={{
-                    hidden: { opacity: 0, y: 20 },
-                    visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } }
-                  }}
-                  className="italic font-accent-italic text-champagne-gold block mt-2 text-[26px] sm:text-[34px] md:text-[42px] lg:text-[50px]"
-                >
-                  crafted for you.
-                </motion.span>
-              </motion.h1>
+        {/* Glass Card */}
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="w-full max-w-[620px] mx-auto rounded-[32px] bg-white/[0.04] backdrop-blur-[32px] border border-white/10 p-10 md:p-14 text-center relative overflow-hidden"
+          style={{ boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.4)' }}
+        >
+          {/* Subtle inner reflection */}
+          <div className="absolute top-0 left-0 right-0 h-[100px] bg-gradient-to-b from-white/[0.06] to-transparent pointer-events-none" />
 
-              {/* Minimal Form */}
-              <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.8, delay: 1 }}
-                className="w-full max-w-[300px] mx-auto"
-              >
-                {!subscribed ? (
-                  <form className="w-full flex flex-col gap-4" onSubmit={handleSubmit}>
-                    <input 
-                      className="w-full bg-transparent focus:bg-transparent hover:bg-transparent border-b border-cream/20 py-3 px-2 focus:border-champagne-gold transition-colors font-body-md text-cream placeholder:text-cream/40 outline-none focus:outline-none focus:ring-0 appearance-none text-center tracking-wide" 
-                      style={{ 
-                        WebkitBoxShadow: '0 0 0px 1000px transparent inset', 
-                        transition: 'background-color 5000s ease-in-out 0s' 
-                      }}
-                      placeholder="Email or phone number" 
-                      autoComplete="off"
-                      type="text"
-                      value={inputValue}
-                      onChange={(e) => setInputValue(e.target.value)}
-                    />
-                    
-                    {error && (
-                      <p className="text-red-400 text-xs tracking-wider mt-2">{error}</p>
-                    )}
+          <h2 className="text-2xl sm:text-3xl font-medium mb-4 text-white">Join our waitlist!</h2>
+          <p className="text-white/60 text-[15px] mb-10 leading-relaxed max-w-[400px] mx-auto hidden sm:block">
+            You'll know it the moment you smell it. Be the first to experience it. Secure your early access.
+          </p>
+          <p className="text-white/60 text-[15px] mb-8 leading-relaxed mx-auto sm:hidden">
+            You'll know it the moment you smell it. Secure your early access.
+          </p>
 
-                    <button 
-                      type="submit" 
-                      disabled={isSubmitting || !inputValue.trim()}
-                      className="w-full bg-transparent border border-champagne-gold text-champagne-gold font-label-caps text-[10px] py-4 tracking-[0.2em] hover:bg-champagne-gold hover:text-carbon-black transition-all duration-300 uppercase mt-4 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-champagne-gold"
-                    >
-                      {isSubmitting ? 'Submitting...' : 'Notify me'}
-                    </button>
-                  </form>
-                ) : (
-                  <div className="w-full py-8 text-center flex flex-col items-center">
-                    <p className="font-body-md text-champagne-gold tracking-wide mb-6 animate-fade-in">
-                      Thank you. You are on the list.
-                    </p>
-                    <button 
-                      onClick={() => {
-                        document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
-                      }}
-                      className="text-cream text-[10px] font-label-caps tracking-[0.2em] border-b border-cream/30 pb-1 hover:border-champagne-gold hover:text-champagne-gold transition-colors uppercase animate-fade-in-delayed"
-                    >
-                      Explore Our Story
-                    </button>
-                  </div>
-                )}
-              </motion.div>
-            </motion.div>
-          </div>
-        </section>
-
-        {/* The House / About Section */}
-        <section id="about" className="py-24 md:py-40 px-8 md:px-16 lg:px-32 bg-background flex flex-col md:flex-row items-center justify-center gap-16 md:gap-24 max-w-[1600px] mx-auto overflow-hidden">
-          {/* Right Image (Now placed left on desktop for editorial layout rhythm) */}
-          <motion.div 
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 1, ease: "easeOut" }}
-            className="w-full md:w-5/12 relative order-2 md:order-1 flex justify-center"
-          >
-             <div className="aspect-[3/4] w-full max-w-[400px] relative bg-carbon-black shadow-2xl mx-auto md:ml-0 md:mr-auto group overflow-hidden">
-                <img 
-                  src={AboutImg} 
-                  alt="The Mustanser Atelier"
-                  loading="lazy"
-                  className="absolute inset-0 w-full h-full object-cover opacity-80 mix-blend-luminosity group-hover:scale-105 transition-transform duration-[2s] ease-out" 
+          {!subscribed ? (
+            <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row items-center gap-3 w-full justify-center">
+              <div className="relative w-full sm:w-auto flex-grow max-w-[340px]">
+                <input 
+                  type="email"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  placeholder="Enter email"
+                  disabled={isSubmitting}
+                  className="w-full bg-black/40 border border-white/10 rounded-full px-6 py-3.5 sm:py-4 text-[15px] text-white placeholder-white/40 focus:outline-none focus:border-white/30 transition-colors shadow-inner"
                 />
-             </div>
-             
-             {/* Editorial overlapping text */}
-             <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8, delay: 0.3 }}
-                className="absolute -bottom-8 -right-4 md:-right-12 lg:-right-20 bg-surface p-8 shadow-xl border border-outline-variant/10 z-20 w-[90%] md:w-auto md:max-w-[280px]"
-             >
-                <span className="block font-accent-italic text-2xl md:text-3xl text-primary mb-3">The Atelier</span>
-                <p className="font-body-md text-sm text-charcoal font-light leading-relaxed">
-                  Where raw ingredients meet uncompromising sophistication.
-                </p>
-             </motion.div>
-          </motion.div>
-
-          {/* Left Text */}
-          <motion.div 
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            variants={{
-              hidden: { opacity: 0 },
-              visible: {
-                opacity: 1,
-                transition: { staggerChildren: 0.15, delayChildren: 0.1 }
-              }
-            }}
-            className="w-full md:w-1/2 flex flex-col justify-center order-1 md:order-2"
-          >
-            <motion.div 
-              variants={{
-                hidden: { opacity: 0, x: 20 },
-                visible: { opacity: 1, x: 0, transition: { duration: 0.6, ease: "easeOut" } }
-              }}
-              className="flex items-center gap-4 mb-8"
-            >
-              <span className="font-label-caps text-[10px] tracking-[0.3em] text-gold uppercase">About Us</span>
-              <div className="w-16 h-[1px] bg-gold"></div>
-            </motion.div>
-
-            <motion.h2 
-              variants={{
-                hidden: { opacity: 0, y: 20 },
-                visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
-              }}
-              className="font-h1 text-[44px] md:text-[56px] leading-[1.05] mb-8 text-primary"
-            >
-              The Architecture <br /> of Essence.
-            </motion.h2>
-
-            <div className="font-body-md text-charcoal space-y-6 font-light leading-relaxed mb-12 max-w-lg text-[15px]">
-              <motion.p
-                variants={{
-                  hidden: { opacity: 0, y: 20 },
-                  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
-                }}
-              >
-                Mustanser Parfum crafts timeless olfactory experiences built on precision, patience, and intention. We view fragrance as presence.
-              </motion.p>
-              <motion.p
-                variants={{
-                  hidden: { opacity: 0, y: 20 },
-                  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
-                }}
-              >
-                Every composition is a careful study in chemistry and craft. Built with carefully selected raw materials, balanced structures, and a strict attention to detail, we create our fragrances as lasting signatures.
-              </motion.p>
-            </div>
-          </motion.div>
-        </section>
-      </main>
-
-      {/* Footer / Contact Section */}
-      <footer id="contact" className="w-full bg-carbon-black pt-16 md:pt-32 pb-8 md:pb-12 px-6 md:px-16 lg:px-32">
-          <motion.div 
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="max-w-[1440px] mx-auto flex flex-col md:flex-row justify-between items-start gap-10 md:gap-16 mb-16 md:mb-24"
-          >
-            
-            {/* Left Box: Logo & Mission */}
-            <div className="max-w-xs flex flex-col items-start text-left">
-              <a href="#" aria-label="Mustanser Home" className="block mb-8 cursor-pointer transition-opacity hover:opacity-80">
-                <img 
-                  src={LogoHeaderImg} 
-                  alt="Mustanser Logo" 
-                  loading="lazy"
-                  className="h-10 md:h-12 w-auto object-contain" 
-                />
-              </a>
-              <p className="font-body-md text-sm text-cream/70 font-light leading-relaxed">
-                We craft timeless olfactory experiences built on precision, patience, and intention.
+              </div>
+              <div className="w-full sm:w-auto relative cursor-pointer group">
+                <BorderGlow
+                  className="w-full sm:w-auto min-h-[50px] sm:min-h-[56px] cursor-pointer"
+                  edgeSensitivity={40}
+                  glowColor="40 68 69"
+                  backgroundColor="#E6C27A"
+                  borderRadius={50}
+                  glowRadius={25}
+                  glowIntensity={1.0}
+                  coneSpread={20}
+                  animated={true}
+                  colors={['#ffffff', '#E6C27A', '#F2D696']}
+                >
+                  <button 
+                    type="submit"
+                    disabled={isSubmitting || !inputValue.trim()}
+                    className="relative w-full h-full min-h-[50px] sm:min-h-[56px] flex items-center justify-center text-black font-semibold rounded-full px-8 text-[15px] hover:bg-white/10 disabled:opacity-50 transition-colors whitespace-nowrap outline-none"
+                  >
+                    {isSubmitting ? 'Joining...' : 'Join Waitlist'}
+                  </button>
+                </BorderGlow>
+              </div>
+            </form>
+          ) : (
+            <div className="py-4">
+              <p className="text-[#E6C27A] font-medium tracking-wide">
+                Thank you. You are on the list.
               </p>
             </div>
+          )}
+          {error && (
+            <p className="text-red-400/90 text-sm tracking-wider mt-5">{error}</p>
+          )}
+        </motion.div>
 
-            {/* Right Box: Grid with Contact & Social */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-10 md:gap-24 w-full md:w-auto text-left">
-              
-              {/* Contact Links */}
-              <div className="flex flex-col gap-6">
-                <h3 className="font-label-caps text-[10px] tracking-[0.3em] text-champagne-gold uppercase mb-2">Get in touch</h3>
-                
-                <div className="flex flex-col gap-1">
-                  <span className="text-[9px] font-label-caps tracking-[0.2em] uppercase text-cream/40">Inquiries</span>
-                  <a href="mailto:info@mustanser.com" className="text-sm font-body-md text-cream hover:text-champagne-gold transition-colors">info@mustanser.com</a>
-                </div>
-                
-                <div className="flex flex-col gap-1">
-                  <span className="text-[9px] font-label-caps tracking-[0.2em] uppercase text-cream/40">Support</span>
-                  <a href="mailto:support@mustanser.com" className="text-sm font-body-md text-cream hover:text-champagne-gold transition-colors">support@mustanser.com</a>
-                </div>
-                
-                <div className="flex flex-col gap-1">
-                  <span className="text-[9px] font-label-caps tracking-[0.2em] uppercase text-cream/40">Phone</span>
-                  <a href="tel:+923395255255" className="text-sm font-body-md text-cream hover:text-champagne-gold transition-colors">+92 339 5255255</a>
-                </div>
-              </div>
+        {/* Social Links */}
+        <motion.div 
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          className="flex flex-wrap items-center justify-center gap-3 mt-10"
+        >
+          <a href="https://facebook.com/mustanserparfum" aria-label="Facebook" target="_blank" rel="noopener noreferrer" className="w-[42px] h-[42px] rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-[#E6C27A]/50 hover:text-[#E6C27A] hover:bg-white/10 transition-colors backdrop-blur-md">
+             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+          </a>
+          <a href="https://instagram.com/mustanserparfum" aria-label="Instagram" target="_blank" rel="noopener noreferrer" className="w-[42px] h-[42px] rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-[#E6C27A]/50 hover:text-[#E6C27A] hover:bg-white/10 transition-colors backdrop-blur-md">
+             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+          </a>
+          <a href="https://www.tiktok.com/@mustanserparfum" aria-label="TikTok" target="_blank" rel="noopener noreferrer" className="w-[42px] h-[42px] rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-[#E6C27A]/50 hover:text-[#E6C27A] hover:bg-white/10 transition-colors backdrop-blur-md">
+             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/></svg>
+          </a>
+          <a href="https://www.pinterest.com/mustanserparfum" aria-label="Pinterest" target="_blank" rel="noopener noreferrer" className="w-[42px] h-[42px] rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-[#E6C27A]/50 hover:text-[#E6C27A] hover:bg-white/10 transition-colors backdrop-blur-md">
+             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.951-7.252 4.105 0 7.301 2.927 7.301 6.83 0 4.083-2.573 7.37-6.146 7.37-1.199 0-2.327-.624-2.712-1.362l-.741 2.827c-.268 1.021-.995 2.299-1.484 3.081 1.155.355 2.383.546 3.651.546 6.621 0 11.988-5.367 11.988-11.988C24 5.367 18.638 0 12.017 0z"/></svg>
+          </a>
+        </motion.div>
 
-              {/* Social Links */}
-              <div className="flex flex-col gap-6">
-                <h3 className="font-label-caps text-[10px] tracking-[0.3em] text-champagne-gold uppercase mb-2">Follow Us</h3>
-                <a className="text-sm font-body-md text-cream hover:text-champagne-gold transition-colors" href="https://www.instagram.com/mustanserparfum/" target="_blank" rel="noopener noreferrer">
-                  Instagram
-                </a>
-                <a className="text-sm font-body-md text-cream hover:text-champagne-gold transition-colors" href="https://www.facebook.com/mustanserparfum" target="_blank" rel="noopener noreferrer">
-                  Facebook
-                </a>
-                <a className="text-sm font-body-md text-cream hover:text-champagne-gold transition-colors" href="https://www.tiktok.com/@mustanserparfum" target="_blank" rel="noopener noreferrer">
-                  TikTok
-                </a>
-                <a className="text-sm font-body-md text-cream hover:text-champagne-gold transition-colors" href="https://wa.me/923395255255" target="_blank" rel="noopener noreferrer">
-                  WhatsApp
-                </a>
-              </div>
-            </div>
-            
-          </motion.div>
+        {/* Contact Info */}
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          className="mt-8 flex flex-col sm:flex-row flex-wrap justify-center items-center gap-6 sm:gap-10 text-center text-white/60 text-[13px] backdrop-blur-md bg-white/5 border border-white/10 px-8 py-5 rounded-3xl"
+        >
+          <div className="flex flex-col">
+            <span className="text-white/40 text-[11px] uppercase tracking-wider mb-1">Inquiries</span>
+            <a href="mailto:info@mustanser.com" className="hover:text-[#E6C27A] transition-colors">info@mustanser.com</a>
+          </div>
+          <div className="hidden sm:block w-[1px] h-8 bg-white/10"></div>
+          <div className="flex flex-col">
+            <span className="text-white/40 text-[11px] uppercase tracking-wider mb-1">Support</span>
+            <a href="mailto:support@mustanser.com" className="hover:text-[#E6C27A] transition-colors">support@mustanser.com</a>
+          </div>
+          <div className="hidden sm:block w-[1px] h-8 bg-white/10"></div>
+          <div className="flex flex-col">
+            <span className="text-white/40 text-[11px] uppercase tracking-wider mb-1">WhatsApp</span>
+            <a href="https://wa.me/923395255255" target="_blank" rel="noopener noreferrer" className="hover:text-[#E6C27A] transition-colors">+92 339 5255255</a>
+          </div>
+        </motion.div>
 
-          <motion.div 
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="max-w-[1440px] mx-auto border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-6"
-          >
-            <div className="flex gap-8 items-center cursor-pointer">
-              <a className="font-label-caps text-[9px] tracking-[0.2em] text-cream/40 hover:text-champagne-gold transition-colors uppercase" href="#">Privacy Policy</a>
-              <a className="font-label-caps text-[9px] tracking-[0.2em] text-cream/40 hover:text-champagne-gold transition-colors uppercase" href="#">Terms of Service</a>
-            </div>
-            
-            <div className="font-label-caps text-[9px] tracking-[0.2em] text-cream/40 uppercase text-center md:text-right">
-              © {new Date().getFullYear()} Mustanser Parfum. All rights reserved.
-            </div>
-          </motion.div>
-        </footer>
+      </main>
+
+      {/* Floating Outline Text */}
+      <div className="absolute -bottom-10 md:-bottom-24 left-0 right-0 z-0 flex justify-center pointer-events-none overflow-hidden select-none pb-12 w-full">
+        <h2 className="text-[20vw] xl:text-[300px] font-bold leading-none tracking-tighter text-transparent w-full text-center"
+            style={{ 
+              WebkitTextStroke: '1.5px rgba(230,194,122,0.1)',
+              transform: 'scaleY(1.1)' 
+            }}>
+          MUSTANSER
+        </h2>
+      </div>
+
+      {/* Footer Text */}
+      <div className="absolute bottom-6 md:bottom-8 left-0 right-0 z-10 flex justify-center items-center text-[11px] font-medium text-white/40 tracking-wider gap-3 select-none">
+        <span>©{new Date().getFullYear()} Mustanser</span>
+        <span className="w-1 h-1 bg-white/20 rounded-full"></span>
+        <span>Architecture of Essence</span>
+      </div>
+
     </div>
   );
 }
