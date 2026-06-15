@@ -36,8 +36,9 @@ export default function App() {
       }
 
       if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-        await new Promise(resolve => setTimeout(resolve, 800));
-        setSubscribed(true);
+        setIsSubmitting(false);
+        setError('Database connection error: Supabase credentials are not configured. Please add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in the settings menu.');
+        return;
       } else {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 15000);
