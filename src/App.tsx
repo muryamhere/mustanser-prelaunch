@@ -37,7 +37,7 @@ export default function App() {
 
       if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
         setIsSubmitting(false);
-        setError('Database connection error: Supabase credentials are not configured. Please add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in the settings menu.');
+        setError('Configuration error: Database credentials missing on the live server. Please add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to your hosting provider\'s environment variables.');
         return;
       } else {
         const controller = new AbortController();
